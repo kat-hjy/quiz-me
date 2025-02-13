@@ -1,0 +1,15 @@
+[project]
+name = "quiz-me"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "chromadb>=0.6.3",
+    "faiss-cpu>=1.10.0",
+    "langchain>=0.3.18",
+    "openai>=1.62.0",
+    "pypdf>=5.3.0",
+    "tiktoken>=0.8.0",
+    "unstructured>=0.16.20",
+]
