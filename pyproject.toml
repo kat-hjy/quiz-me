@@ -15,3 +15,21 @@ name = "quiz-me"
 readme = "README.md"
 requires-python = ">=3.12"
 version = "0.1.0"
+
+[tool.interrogate]
+exclude = ["tests", "__init__.py"]
+fail-under = 90
+ignore-init-method = true
+ignore-init-module = true
+ignore-regex = []
+verbose = 1
+whitelist-regex = []
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.uv]
+dev-dependencies = [
+  "pylint>=2.16.2",
+  "pytest>=7.4.0"
+]

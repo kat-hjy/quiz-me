@@ -11,7 +11,7 @@ repos:
       - id: check-merge-conflict
       - id: check-added-large-files
         args: [--maxkb=10000]
-        exclude: ^notebooks/
+        # exclude:
       - id: name-tests-test
         args: [--django]
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -21,7 +21,7 @@ repos:
       # Run the linter.
       - id: ruff
         args: [--fix]
-        exclude: src/sunray/packages
+        # exclude:
       # Run the formatter.
       - id: ruff-format
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
