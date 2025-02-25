@@ -1,0 +1,3 @@
+retrieval:
+    vector_store:
+        persist_directory: "/Users/katrinahoong/Documents/miscellaneous/coding/portfolio/quiz-me/chromadb"
