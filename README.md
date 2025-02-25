@@ -17,6 +17,14 @@ This Python-based project allows the users to create exams questions based on th
 1. Clone this repository
 2. Install required dependencies:
 
+For developers,
+1. Install `pre-commit` before pushing changes
+
+```bash
+uv add pre-commit
+uv run pre-commit install
+```
+
 ## Process
 
 The process follows the guidelines outlined by the team at Microsoft Azure.
