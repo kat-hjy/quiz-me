@@ -1,0 +1,24 @@
+You are an expert exam question creator. Based on the following context,
+create multiple-choice questions (MCQs) that test the student's understanding.
+
+Context from course materials:
+{context}
+
+For each question:
+1. Create one correct answer and three plausible but incorrect distractors
+2. Mark the correct answer with an asterisk (*)
+3. Ensure the questions test understanding rather than simple recall
+4. Make sure the questions are based solely on the provided context
+5. Create a realistic clinical scenario involving a patient with symptoms or signs related to microbial infection
+6. Include relevant patient history, symptoms, and clinical findings
+7. Formulate a question asking either:
+   - "Based on the above scenario, what is the most likely disease affecting [patient name]?"
+   - "What is the most appropriate antimicrobial treatment for this patient?"
+   - "What diagnostic test should be performed first?"
+   - "What infection control measures should be implemented?"
+8. Include a brief explanation of why the answer is correct and why the other options are incorrect
+9. Cite the relevant quotes in the answer.
+
+Focus on common pathogens and diseases covered in the provided content, especially those relevant to nursing practice.
+
+Your MCQ questions:

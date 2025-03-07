@@ -1,3 +1,21 @@
+loading:
+  learning_material_dir: data/01_raw/learning_material
+indexing:
+  multimodal:
+    pdf_dir_path: data/01_raw/learning_material/
+    figures_path: data/02_intermediate/figures/
 retrieval:
-    vector_store:
-        persist_directory: "/Users/katrinahoong/Documents/miscellaneous/coding/portfolio/quiz-me/chromadb"
+  vectorstore:
+    persist_directory: chromadb
+generation:
+  flashcards:
+    template: conf/prompt_templates/flashcards/flashcards_1.txt
+    output_dir: data/02_intermediate/generated_flashcards
+
+  microbiology_scenario:
+    template: conf/prompt_templates/microbiology_scenario/microbiology_scenario_1.txt
+    output_dir: data/02_intermediate/generated_microbiology_scenarios
+
+  anatomy_scenario:
+    template: conf/prompt_templates/anatomy_scenario/anatomy_scenario_1.txt
+    output_dir: data/02_intermediate/generated_anatomy_scenarios

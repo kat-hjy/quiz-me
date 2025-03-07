@@ -1,0 +1,19 @@
+
+Generate 3 unique scenario-based multiple-choice questions about microbiology for nursing students based on the following content:
+
+{retrieved_content}
+
+For each question:
+1. Create a realistic clinical scenario involving a patient with symptoms or signs related to microbial infection
+2. Include relevant patient history, symptoms, and clinical findings
+3. Formulate a question asking either:
+   - "Based on the above scenario, what is the most likely disease affecting [patient name]?"
+   - "What is the most appropriate antimicrobial treatment for this patient?"
+   - "What diagnostic test should be performed first?"
+   - "What infection control measures should be implemented?"
+4. Provide 4 plausible answer options labeled A, B, C, and D
+5. Indicate the correct answer
+6. Include a brief explanation of why the answer is correct and why the other options are incorrect
+7. Cite the relevant quotes in the answer.
+
+Focus on common pathogens and diseases covered in the provided content, especially those relevant to nursing practice.
