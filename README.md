@@ -201,7 +201,7 @@ The goal of this section is to present our current understanding of the document
 
 A high-level overview of the classifications of documents include by module, and by sub-topic or week.
 
-The topics (tested for Mid-Term exams) are mainly classified into:
+The topics are mainly classified into (except Immunology):
 
 ```mermaid
 
@@ -258,7 +258,8 @@ The types of documents are mainly classified into these sub-classifications:
 - module information (curriculum, learning objectives, topics tested for exams etc.)
 - lecture notes (mainly slides)
 - tutorial materials (including readings, slides etc.)
-- lab / clinical simulation notes
+- lab / clinical simulation notes (not too important for NUR1124)
+- physical assessment (not too important for NUR1124)
 - consolidation notes (summaries, repeats of what has been mentioned)
 - additional readings such as research papers, articles, professional guidelines
 - textbooks
@@ -267,8 +268,15 @@ The types of documents are mainly classified into these sub-classifications:
 The most relevant for generating exam questions are:
 
 1. module information: for knowing the scope of the exams
-2. everything else except admin information, sample exam questions and additional readings (unless stated otherwise)
+2. everything else except admin information, textbooks, sample exam questions and additional readings (unless stated otherwise)
 3. sample exam questions to act as a guide for the type/style of exam questions to generate
+
+The specific subclassifications are:
+* NUR1124_LN: NUR1124 Lecture Notes
+* NUR1124_PT*: Physiology Tutorial
+* NUR1124_AL*: Anatomy Lab
+* NUR1124_PA*: Physical Assessment
+* NUR2125
 
 ##### Formats
 
@@ -284,9 +292,5 @@ No authentication or authorization is required to access these documents as they
 - Most of them have aims and learning objectives / outcomes organised at the front of the slides.
 - Each set of lecture notes / tutorial materials are formatted differently. For example, having different orientation (2 x 2, or 1 slide per page), with or without a header/footer etc.
 - Some materials contain images and whether they are relevant. Some slides are also split up into its main contents, answer key to some questions in the slides, and an appendix.
-- Amongst the contents in the slides, some are more important than others - for example, those labelled with "\*\*Important\*\*" or "\*\*Tested\*\*"
+- Amongst the contents in the slides, for MIC2000A in particular, the examinable scope is labelled with "\*\*Important\*\*" or "\*\*Tested\*\*"
 - Admin, extra readings etc may also not be as relevant or important as they are not tested in exams, but they may be relevant in guiding the user as to what is important for exams / what is within scope.
-
-#### Challenges
-
-### 2.
