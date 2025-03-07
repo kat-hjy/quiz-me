@@ -1,7 +1,11 @@
 data
+notebooks
+quiz_me.egg-info
 
+__pycache__
+.venv
 .env
-
+.vscode
 
 .langchain.db
 chromadb

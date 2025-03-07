@@ -49,9 +49,9 @@ One of the factors leading to feeling overwhelmed could stem from ineffective st
 
 ###### Solution
 
-To tackle the above root cause, one possible aid could be to generate exam questions and answer pairs with explanations, to aid in active recall, which helps with memorization (Source: [Memorization Strategies](https://learningcenter.unc.edu/tips-and-tools/enhancing-your-memory/#:~:text=Use%20distributed%20practice.&text=Use%20repetition%20to%20firmly%20lodge,in%20between%20each%20study%20session.)). A proposed solution would be to build an end-to-end Machine Learning pipeline that processes learning materials from NUS Nursing modules and utilize an existing Large Language Model (LLM) to generate and evaluate such exam questions.
+To tackle the above root cause, one possible aid could be to generate flashcard question and answer pairs with explanations, to aid in active recall, which helps with memorization (Source: [Memorization Strategies](https://learningcenter.unc.edu/tips-and-tools/enhancing-your-memory/#:~:text=Use%20distributed%20practice.&text=Use%20repetition%20to%20firmly%20lodge,in%20between%20each%20study%20session.)). A proposed solution would be to build an end-to-end Machine Learning pipeline to index learning materials from the modules and retrieve relevant context based on the user's query, and then utilize an existing Large Language Model (LLM) to generate and evaluate such exam questions.
 
-An appropriate pattern to use would be the Retrieval-Augmented Generation (RAG) pattern, an "industry-standard approach to building applications that use language models to process specific or proprietary data that the model doesn't already know" (Source: [Azure article](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide)). The RAG framework is used so as to ensure relevancy to the NUS Nursing exams' context, and that the exam questions are based on valid knowledge.
+An appropriate pattern to use would be the Retrieval-Augmented Generation (RAG) pattern, an "industry-standard approach to building applications that use language models to process specific or proprietary data that the model doesn't already know" (Source: [Azure article](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide)). The RAG framework is used so as to ensure relevancy to the exams' context, and that the exam questions are based on valid knowledge.
 
 This project aims to build a proof of concept for the above use case, specifically for a subset of modules. After being proven for this use case, we can then add additional modules as the term goes along. Extending from that, the model could be a:
 
@@ -63,8 +63,8 @@ Overall, the solution aims to help students be more confident and prepared in th
 
 The kind of questions the solution should answer include:
 
-1. "Give me exam questions on [module name] on the topic of \[sub-topic\]"
-2. "Where can I find the source of this explanation?"
+1. "Give me flashcard questions and answers on [module name] on the topic of \[topic\]"
+2. "Give me MCQ exam questions and answers on [module name] on the topic of \[topic\]"
 
 - The following are the modules with exams:
 
