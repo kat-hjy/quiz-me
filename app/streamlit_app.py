@@ -13,6 +13,8 @@ st.title("🦜🔗 Quickstart App")
 openai_api_key = st.sidebar.text_input("Anthropic API Key", type="password")
 CONFIG_PATH = os.getenv("CONFIG_PATH")
 logger.info(f"CONFIG_PATH: {CONFIG_PATH}")
+if not CONFIG_PATH:
+    CONFIG_PATH = st.secrets["CONFIG_PATH"]
 config = gu.load_config(config_path=CONFIG_PATH)
 model_category = config["model"]["category"]
 
@@ -26,7 +28,7 @@ def generate_response(input_text):
             max_retries=config["model"]["anthropic"]["max_retries"],
             max_tokens=config["model"]["anthropic"]["max_tokens"],
         )
-    st.info(model.invoke(input_text))
+    st.info(dict(model.invoke(input_text))["content"])
 
 
 with st.form("my_form"):
