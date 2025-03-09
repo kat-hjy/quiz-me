@@ -4,3 +4,4 @@ libsm6
 libxext6
 tesseract-ocr
 tesseract-ocr-all
+libglib2.0-0
