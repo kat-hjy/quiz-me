@@ -3,7 +3,11 @@
 ## Description
 A learning aid generating study questions from a knowledge base of lecture notes.
 
-🔗 Click [here](https://quiz-me.streamlit.app/) to check out the demo! *Note: you will need an Anthropic API key.* 👏 Template credits: [Chanin Nantasenamat](https://blog.streamlit.io/langchain-tutorial-1-build-an-llm-powered-app-in-18-lines-of-code/).
+🔗 Check out the [demo](https://quiz-me.streamlit.app/)!
+
+*Note: you will need an Anthropic API key.*
+
+👏 Template credits: [Chanin Nantasenamat](https://blog.streamlit.io/langchain-tutorial-1-build-an-llm-powered-app-in-18-lines-of-code/).
 
 
 ### Features
