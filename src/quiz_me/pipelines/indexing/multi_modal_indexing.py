@@ -31,6 +31,8 @@ load_dotenv()
 
 
 class MultiModalIndexing:
+    """MultiModalIndexing class for indexing multimodal documents."""
+
     def __init__(
         self,
         docstore_dir: str,
@@ -334,7 +336,15 @@ class MultiModalIndexing:
             return base64.b64encode(image_file.read()).decode("utf-8")
 
     def _image_summarize(self, img_base64, prompt):
-        """Make image summary"""
+        """Make image summary
+
+        Args:
+            img_base64: base64 encoded image
+            prompt: prompt for summarizing image
+
+        Returns:
+            str: image summary
+        """
 
         msg = self.llm.invoke(
             [

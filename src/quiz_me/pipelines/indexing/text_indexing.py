@@ -18,6 +18,8 @@ load_dotenv()
 
 
 class TextIndexing:
+    """TextIndexing class for indexing text documents."""
+
     def __init__(self, vectorstore_dir: str, collection_name: str):
         """Initialize the Indexing class.
 

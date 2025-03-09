@@ -16,36 +16,74 @@ import os
 import yaml
 from typing import Dict, List
 from langchain_core.documents import Document
-from langgraph.pregel.io import AddableValuesDict
 from datetime import datetime
 import pytz
+import json
+from langgraph.pregel.io import AddableValuesDict
 
 load_dotenv()
 
 
+def serialize_document(doc: Document) -> dict:
+    """Serialize a Document object to a dictionary."""
+    return {"page_content": doc.page_content, "metadata": doc.metadata}
+
+
+def serialize_state(state: AddableValuesDict) -> dict:
+    """Serialize a AddableValuesDict object to a dictionary."""
+    return {k: serialize_value(v) for k, v in state.items()}
+
+
+def serialize_value(value: any) -> any:
+    """Recursively serialize values to JSON-compatible format."""
+    if isinstance(value, Document):
+        return serialize_document(value)
+    elif isinstance(value, list):
+        return [serialize_value(item) for item in value]
+    elif isinstance(value, dict):
+        return {k: serialize_value(v) for k, v in value.items()}
+    elif isinstance(value, AddableValuesDict):
+        return serialize_state(value)
+    elif hasattr(value, "dict"):  # For Pydantic models
+        return value.dict()
+    elif hasattr(value, "to_dict"):  # For other objects with to_dict method
+        return value.to_dict()
+    return value
+
+
 def save_output(output: Dict | AddableValuesDict, output_dir: str) -> None:
-    """Saves the output to a txt file.
+    """Save the output to a JSON file with timestamp.
 
     Args:
-        output (Dict | AddableValuesDict): The output to save.
-
-    Returns:
-        None
+        output: The output to save
+        output_dir: Directory to save the output file
     """
     # Get Singapore timezone
     tz = pytz.timezone("Asia/Singapore")
     timestamp = datetime.now(tz).strftime("%Y%m%d_%H%M%S")
 
-    # Create save path with timestamp
-    save_path = os.path.join(output_dir, f"output_{timestamp}.txt")
-
-    # Make output directory if it doesn't exist
+    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
 
-    # Save output to file
-    with open(save_path, "w") as file:
-        file.write(str(output))
-    logger.info(f"Output saved to {save_path}.")
+    # Create save path with timestamp
+    save_path = os.path.join(output_dir, f"output_{timestamp}.json")
+
+    try:
+        # Serialize the output
+        serialized_output = serialize_value(output)
+
+        # Save to JSON file
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump(serialized_output, f, indent=2, ensure_ascii=False)
+        logger.info(f"Output saved to {save_path}")
+
+    except Exception as e:
+        logger.error(f"Error saving output: {e}")
+        # Save as text if JSON serialization fails
+        txt_path = os.path.join(output_dir, f"output_{timestamp}.txt")
+        with open(txt_path, "w", encoding="utf-8") as f:
+            f.write(str(output))
+        logger.warning(f"Saved output as text file instead: {txt_path}")
 
 
 def num_tokens_from_string(string: str, encoding_name: str = "cl100k_base") -> int:
@@ -63,7 +101,7 @@ def num_tokens_from_string(string: str, encoding_name: str = "cl100k_base") -> i
     return num_tokens
 
 
-def load_catalog(catalog_path: str = None) -> Dict:
+def load_catalog() -> Dict:
     """Loads the catalog file and returns its contents.
 
     Args:

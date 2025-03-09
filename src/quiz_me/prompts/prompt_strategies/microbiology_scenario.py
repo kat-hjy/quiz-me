@@ -52,6 +52,8 @@ class State(TypedDict):
 
 
 class MicrobiologyScenario:
+    """Microbiology scenario prompt strategy."""
+
     def __init__(
         self,
         retriever: VectorStoreRetriever,
