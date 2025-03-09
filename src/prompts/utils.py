@@ -14,11 +14,12 @@ def get_prompt(template: str) -> PromptTemplate:
 
     Args:
         template (str): Template string.
+        input_var (list): List of input variables.
 
     Returns:
         PromptTemplate: PromptTemplate object.
     """
-    prompt = PromptTemplate.from_template(template)
+    prompt = PromptTemplate.from_template(template=template)
     return prompt
 
 

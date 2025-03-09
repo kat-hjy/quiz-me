@@ -7,6 +7,9 @@ from langchain_core.vectorstores.base import VectorStoreRetriever
 from dotenv import load_dotenv
 from loguru import logger
 from langchain_chroma import Chroma
+from langchain_anthropic import ChatAnthropic
+from langchain.retrievers.multi_vector import MultiVectorRetriever
+from pathlib import Path
 
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -37,18 +40,32 @@ if __name__ == "__main__":
         vectorstore_dir=catalog["retrieval"]["vectorstore"]["persist_directory"],
         collection_name=config["indexing"]["text"]["collection_name"],
     )
+    # Instantiate LLM object
+    model_category: str = config["model"]["category"]
+    if model_category == "anthropic":
+        llm: ChatAnthropic = mu.get_anthropic_llm(
+            model_name=config["model"]["anthropic"]["model_name"],
+            temperature=config["model"]["anthropic"]["temperature"],
+            timeout=config["model"]["anthropic"]["timeout"],
+            max_retries=config["model"]["anthropic"]["max_retries"],
+            max_tokens=config["model"]["anthropic"]["max_tokens"],
+        )
+    else:
+        raise ValueError(f"Model category {model_category} not recognized.")
     mmi: MultiModalIndexing = MultiModalIndexing(
+        docstore_dir=catalog["retrieval"]["docstore"]["root_path"],
         vectorstore_dir=catalog["retrieval"]["vectorstore"]["persist_directory"],
         collection_name=config["indexing"]["multimodal"]["collection_name"],
+        llm=llm,
     )
 
     ### INDEXING ###
     logger.info("Indexing...")
-    if config["indexing"]["activate"]:
-        if config["indexing"]["type"] == "text":
+    if config["indexing"]["type"] == "text":
+        if config["indexing"]["activate"]:
             logger.info("Indexing text only...")
             docs: list[Document] = idx.load_documents(
-                catalog["loading"]["learning_material_dir"]
+                catalog["indexing"]["text"]["learning_material_dir"]
             )
             docs: list[Document] = idx.preprocess_documents(docs)
             docs: list[Document] = idx.split_documents(docs)
@@ -59,45 +76,43 @@ if __name__ == "__main__":
                 collection_name=config["indexing"]["text"]["collection_name"],
                 docs=docs,
             )
-        elif config["indexing"]["type"] == "multimodal":
-            pdf_dir_path = catalog["indexing"]["multimodal"]["pdf_dir_path"]
-            figures_path = catalog["indexing"]["multimodal"]["figures_path"]
-            logger.info("Indexing multimodal embeddings...")
-            text, tables, image_uris = mmi.process_pdf_dir(pdf_dir_path, figures_path)
-            vectorstore = mmi.get_vectorstore()
-            mmi.get_retriever(vectorstore)
         else:
-            raise ValueError(
-                f"Indexing type {config['indexing']['type']} not recognized."
-            )
+            logger.info("Indexing is not activated. Getting vectorstore from memory...")
+            vectorstore: Chroma = idx.get_vectorstore()
+    elif config["indexing"]["type"] == "multimodal":
+        if config["indexing"]["activate"]:
+            pdf_dir_path = Path(
+                catalog["indexing"]["multimodal"]["pdf_dir_path"]
+            ).resolve()
+            figures_path = Path(
+                catalog["indexing"]["multimodal"]["figures_path"]
+            ).resolve()
+            logger.info("Indexing multimodal embeddings...")
+            logger.debug(f"PDF directory path: {str(pdf_dir_path)}")
+            logger.debug(f"Figures path: {str(figures_path)}")
+            mmi.load_documents(str(pdf_dir_path), str(figures_path))
+            vectorstore: Chroma = mmi.get_vectorstore()
+        else:
+            logger.info("Indexing is not activated. Getting vectorstore from memory...")
+            vectorstore: Chroma = mmi.get_vectorstore()
     else:
-        logger.info("Indexing is not activated. Getting vectorstore from memory...")
-        vectorstore: Chroma = idx.get_vectorstore()
+        raise ValueError(f"Indexing type {config['indexing']['type']} not recognized.")
 
     if config["generation"]["activate"]:
-        ### MODELING ###
-        model_category: str = config["model"]["category"]
-        if model_category == "anthropic":
-            llm = mu.get_anthropic_llm(
-                model_name=config["model"]["anthropic"]["model_name"],
-                temperature=config["model"]["anthropic"]["temperature"],
-                timeout=config["model"]["anthropic"]["timeout"],
-                max_retries=config["model"]["anthropic"]["max_retries"],
-                max_tokens=config["model"]["anthropic"]["max_tokens"],
-            )
-        else:
-            raise ValueError(f"Model category {model_category} not recognized.")
-
         ### RETRIEVAL ###
         # TODO: use Strategy Pattern for indexing
-        retriever: VectorStoreRetriever = idx.get_retriever(vectorstore)
+        if config["indexing"]["type"] == "text":
+            retriever: VectorStoreRetriever = idx.get_retriever(vectorstore)
+        elif config["indexing"]["type"] == "multimodal":
+            retriever: MultiVectorRetriever = mmi.get_retriever(vectorstore)
 
         ### GENERATION ###
         prompt_strategy: str = config["generation"]["prompt_strategy"]
         with open(catalog["generation"][prompt_strategy]["template"], "r") as file:
             prompt_content = file.read()
-        prompt = pu.get_prompt(prompt_content)
+            logger.debug(f"Prompt content: \n{prompt_content}")
         if prompt_strategy == "flashcards":
+            prompt = pu.get_prompt(prompt_content)
             prompt_context: PromptContext = PromptContext(
                 strategy=Flashcards(retriever=retriever, llm=llm, prompt=prompt)
             )
@@ -105,14 +120,20 @@ if __name__ == "__main__":
                 {"topic": config["generation"][prompt_strategy]["topic"]}
             )
         elif prompt_strategy == "microbiology_scenario":
+            prompt = pu.get_prompt(prompt_content)
             prompt_context: PromptContext = PromptContext(
                 strategy=MicrobiologyScenario(
                     retriever=retriever, llm=llm, prompt=prompt
                 )
             )
         elif prompt_strategy == "anatomy_scenario":
+            prompt = pu.get_prompt(template=prompt_content)
+            logger.info("Generating response using AnatomyScenario...")
             prompt_context: PromptContext = PromptContext(
                 strategy=AnatomyScenario(retriever=retriever, llm=llm, prompt=prompt)
+            )
+            output = prompt_context.generate_response(
+                {"topic": config["generation"][prompt_strategy]["topic"]}
             )
         else:
             raise ValueError(f"Prompt strategy {prompt_strategy} not recognized.")

@@ -9,20 +9,16 @@ model:
     timeout:
 
 indexing:
-  activate: true
+  activate: false
   type: multimodal   # "multimodal" or "text"
   text:
     collection_name: text_doc
   multimodal:
-    collection_name: multimodal_doc
-
-retrieval:
-  vectorstore:
-    collection_name: multimodal_doc # quiz_me_multi_modal_doc, quiz_me_text_doc
+    collection_name: multimodal_doc_2
 
 generation:
-  activate: false
-  prompt_strategy: flashcards
+  activate: true
+  prompt_strategy: anatomy_scenario
 
   flashcards:
     topic: community acquired pneumonia
@@ -32,5 +28,4 @@ generation:
     param2:
 
   anatomy_scenario:
-    param1:
-    param2:
+    topic: digestive system

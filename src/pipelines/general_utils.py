@@ -1,7 +1,15 @@
 """This module contains general utility functions for the pipelines."""
 
 import tiktoken
-from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    BarColumn,
+    TextColumn,
+    TaskProgressColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 from dotenv import load_dotenv
 from loguru import logger
 import os
@@ -122,4 +130,7 @@ def get_progress_bar() -> Progress:
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
+        TaskProgressColumn(),
+        TimeElapsedColumn(),
+        TimeRemainingColumn(),
     )

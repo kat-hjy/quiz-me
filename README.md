@@ -288,5 +288,8 @@ No authentication or authorization is required to access these documents as they
 - Admin, extra readings etc may also not be as relevant or important as they are not tested in exams, but they may be relevant in guiding the user as to what is important for exams / what is within scope.
 
 #### Challenges
+##### Extracting images
+* The lecture notes are a mix of images and texts. Some libraries out there such as `Unstructured` do extract text and images, but the library does still miss out images from lecture notes with many images.
+
 
 ### 2.

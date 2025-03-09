@@ -4,6 +4,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from langgraph.pregel.io import AddableValuesDict
 from langgraph.graph.state import CompiledStateGraph
+from loguru import logger
 
 
 class PromptContext:
@@ -42,6 +43,8 @@ class PromptContext:
         The Context delegates some work to the Strategy object instead of
         implementing multiple versions of the algorithm on its own.
         """
+        logger.debug(f"Generating response with strategy: {self._strategy}")
+
         graph: CompiledStateGraph = self._strategy.compile_application()
         input.update({"graph": graph})
         output: AddableValuesDict = self._strategy.generate_output(input)

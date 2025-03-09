@@ -1,52 +1,57 @@
-"""This module contains the MultiModalIndexing class for indexing multimodal data."""
+"""This module contains the MultiModalIndexing class for indexing multimodal documents."""
 
-from unstructured.partition.pdf import partition_pdf
+from langchain_core.documents import Document
 from loguru import logger
-import os
-import uuid
-from langchain_chroma import Chroma
-from pathlib import Path
-
-from src.pipelines import general_utils as gu
-from dotenv import load_dotenv
 import chromadb
 from chromadb import ClientAPI
+from langchain_chroma import Chroma
 from chromadb.api.models import Collection
 from langchain_core.embeddings.embeddings import Embeddings
+from langchain_voyageai import VoyageAIEmbeddings
+from dotenv import load_dotenv
+import os
+from pathlib import Path
+import src.pipelines.general_utils as gu
+from langchain_text_splitters import CharacterTextSplitter
+from unstructured.partition.pdf import partition_pdf
+from unstructured.documents.elements import Element
+import time
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_anthropic import ChatAnthropic
+import base64
+from langchain_core.messages import HumanMessage
+import uuid
 
-# from langchain_voyageai import VoyageAIEmbeddings
-from langchain_experimental.open_clip import OpenCLIPEmbeddings
-from langchain_core.vectorstores.base import VectorStoreRetriever
+from langchain.retrievers.multi_vector import MultiVectorRetriever
+from langchain.storage.file_system import LocalFileStore
+
 
 load_dotenv()
 
-# TODO: postprocess text and images to remove unwanted images and texts (e.g. NUS, or timetable/admin info)
-
 
 class MultiModalIndexing:
-    def __init__(self, vectorstore_dir: str, collection_name: str):
-        """Initialize the MultiModalIndexing class.
+    def __init__(
+        self,
+        docstore_dir: str,
+        vectorstore_dir: str,
+        collection_name: str,
+        llm: ChatAnthropic,
+    ):
+        """Initialize the Indexing class.
 
         Args:
             vectorstore_dir (str): Directory to store the vectorstore.
             collection_name (str): Name of the collection to store documents to.
         """
+        VOYAGE_MODEL = os.getenv("VOYAGE_MODEL")
         self.persistent_client: ClientAPI = chromadb.PersistentClient(
             path=vectorstore_dir
         )
         self.collection: Collection = self.persistent_client.get_or_create_collection(
             collection_name
         )
-        # VOYAGE_MULTIMODAL_MODEL = os.getenv("VOYAGE_MULTIMODAL_MODEL")
-        # self.embeddings: Embeddings = VoyageAIEmbeddings(model=VOYAGE_MULTIMODAL_MODEL)
-
-        OPENCLIP_MODEL_NAME = os.getenv("OPENCLIP_MODEL_NAME")
-        OPENCLIP_CHECKPOINT = os.getenv("OPENCLIP_CHECKPOINT")
-        # OpenCLIP model
-        self.embeddings: Embeddings = OpenCLIPEmbeddings(
-            model_name=OPENCLIP_MODEL_NAME, checkpoint=OPENCLIP_CHECKPOINT
-        )
-
+        self.embeddings: Embeddings = VoyageAIEmbeddings(model=VOYAGE_MODEL)
         self.vectorstore: Chroma = Chroma(
             client=self.persistent_client,
             collection_name=collection_name,
@@ -54,43 +59,215 @@ class MultiModalIndexing:
             persist_directory=vectorstore_dir,
             create_collection_if_not_exists=False,
         )
-        self.retriever: VectorStoreRetriever = None
+        self.retriever: MultiVectorRetriever = None
+        self.llm = llm
+        # Initialize the storage layer
+        self.store: LocalFileStore = LocalFileStore(root_path=docstore_dir)
+        self.id_key = "doc_id"
 
-    def _process_pdf(
-        self, path: str, figures_path: str
-    ) -> tuple[list[str], list[str], list[str]]:
-        """Process a PDF file.
+    def load_documents(self, dir_path: str, output_dir: str) -> None:
+        """Load PDF documents from a directory.
 
         Args:
-            path (str): Path to the PDF file.
-            figures_path (str): Main directory to store extracted images.
+            dir_path (str): Path to the directory containing PDF documents.
+            output_dir (str): Path to save extracted images
+        """
+        progress = gu.get_progress_bar()
+        pdf_files = list(Path(dir_path).rglob("*.pdf"))
+        task = progress.add_task("Processing PDFs", total=len(pdf_files))
+
+        with progress:
+            for pdf in pdf_files:
+                # Create subdirectory path using pdf file hierarchy
+                pdf_path_obj = Path(pdf)
+                subfolder = "_".join(
+                    [
+                        pdf_path_obj.parent.parent.stem,
+                        pdf_path_obj.parent.stem,
+                        pdf_path_obj.stem,
+                    ]
+                )
+                save_path = Path(output_dir) / subfolder
+
+                # Ensure directory exists
+                save_path.mkdir(parents=True, exist_ok=True)
+
+                # Convert to absolute path to ensure unstructured uses correct location
+                abs_save_path = str(save_path.resolve())
+                pdf = str(pdf.resolve())
+                logger.debug(f"Saving images to: {abs_save_path}")
+                logger.info(f"Processing {pdf}")
+                # Get elements
+                substeps = [
+                    "Extracting elements",
+                    "Categorizing elements",
+                    "Splitting text into 4k token chunks",
+                    "Generating text and table summaries",
+                    "Generating image summaries",
+                    "Indexing documents",
+                ]
+                inner_task = progress.add_task(
+                    "[cyan]Processing steps", total=len(substeps)
+                )
+
+                progress.update(
+                    inner_task, advance=1, description=f"[cyan]{substeps[0]}"
+                )
+
+                raw_pdf_elements = self._extract_pdf_elements(pdf, abs_save_path)
+
+                # Get text, tables
+                progress.update(
+                    inner_task, advance=1, description=f"[cyan]{substeps[1]}"
+                )
+                texts, tables = self._categorize_elements(raw_pdf_elements)
+
+                # Optional: Enforce a specific token size for texts
+                progress.update(
+                    inner_task, advance=1, description=f"[cyan]{substeps[2]}"
+                )
+                text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
+                    chunk_size=4000, chunk_overlap=0
+                )
+                joined_texts = " ".join(texts)
+                texts_4k_token = text_splitter.split_text(joined_texts)
+
+                # Use multi-vector-retriever to index image (and / or text, table) summaries,
+                # but retrieve raw images (along with raw texts or tables).
+                progress.update(
+                    inner_task, advance=1, description=f"[cyan]{substeps[3]}"
+                )
+                text_summaries, table_summaries = self._generate_text_summaries(
+                    texts_4k_token, tables, summarize_texts=True
+                )
+
+                # Image summaries
+                progress.update(
+                    inner_task, advance=1, description=f"[cyan]{substeps[4]}"
+                )
+                img_base64_list, image_summaries = self._generate_img_summaries(
+                    abs_save_path
+                )
+
+                # Add to vectorstore
+                # Add raw docs and doc summaries to Multi Vector Retriever:
+                # Store the raw texts, tables, and images in the docstore.
+                # Store the texts, table summaries, and image summaries in the vectorstore for efficient semantic retrieval.
+                # Create retriever
+                progress.update(
+                    inner_task, advance=1, description=f"[cyan]{substeps[5]}"
+                )
+                self._index_documents(
+                    self.vectorstore,
+                    text_summaries,
+                    texts,
+                    table_summaries,
+                    tables,
+                    image_summaries,
+                    img_base64_list,
+                )
+                progress.advance(task_id=task, advance=1)
+
+        logger.info("Finished processing PDFs")
+
+    def _index_documents(
+        self,
+        vectorstore: Chroma,
+        text_summaries: list[str],
+        texts: list[str],
+        table_summaries: list[str],
+        tables: list[str],
+        image_summaries: list[str],
+        images: list[str],
+    ) -> None:
+        """
+        Uses a retriever that indexes summaries, but returns raw images or texts to index documents.
+
+        Args:
+            vectorstore: Chroma
+            text_summaries: List of text summaries
+            texts: List of texts
+            table_summaries: List of table summaries
+            tables: List of tables
+            image_summaries: List of image summaries
+            images: List of images
+        """
+        # Create the multi-vector retriever
+        self.retriever: MultiVectorRetriever = self.get_retriever(vectorstore)
+
+        # Helper function to add documents to the vectorstore and docstore
+        def add_documents(retriever, doc_summaries, doc_contents):
+            doc_ids = [str(uuid.uuid4()) for _ in doc_contents]
+            summary_docs = [
+                Document(page_content=s, metadata={self.id_key: doc_ids[i]})
+                for i, s in enumerate(doc_summaries)
+            ]
+            retriever.vectorstore.add_documents(summary_docs)
+            # Convert strings to bytes objects before storing
+            doc_contents_bytes = [
+                dc.encode("utf-8") if isinstance(dc, str) else dc for dc in doc_contents
+            ]
+            retriever.docstore.mset(list(zip(doc_ids, doc_contents_bytes)))
+
+        # Add texts, tables, and images
+        # Check that text_summaries is not empty before adding
+        if text_summaries:
+            logger.debug("Adding text summaries to the vectorstore")
+            add_documents(self.retriever, text_summaries, texts)
+        # Check that table_summaries is not empty before adding
+        if table_summaries:
+            logger.debug("Adding table summaries to the vectorstore")
+            add_documents(self.retriever, table_summaries, tables)
+        # Check that image_summaries is not empty before adding
+        if image_summaries:
+            logger.debug("Adding image summaries to the vectorstore")
+            add_documents(self.retriever, image_summaries, images)
+
+    # Extract elements from PDF
+    def _extract_pdf_elements(self, pdf_path: str, output_dir: str) -> list[Element]:
+        """
+        Extract images, tables, and chunk text from a PDF file.
+        Args:
+            pdf_path: path of .pdf file
+            output_dir: path to save extracted images
 
         Returns:
-            tuple[list[str], list[str], list[str]]: A tuple containing the texts, tables, and image URIs extracted from the
+            list[Element]: List of elements extracted from the PDF
         """
-        # Create unique subfolder for extracted figures based on PDF path
-        pdf_path = Path(path)
-        subfolder = "_".join(
-            [pdf_path.parent.parent.stem, pdf_path.parent.stem, pdf_path.stem]
-        )
-        figures_path = Path(figures_path) / subfolder
-        figures_path.mkdir(parents=True, exist_ok=True)
-        logger.debug(f"Processing PDF: {path}")
-        # Extract images, tables, and chunk text
-        logger.debug(f"image_path: {figures_path}")
-        raw_pdf_elements = partition_pdf(
-            filename=str(path),
-            extract_image_block_types=["Image", "Table"],
-            infer_table_structure=True,
-            chunking_strategy="by_title",
-            max_characters=1000,
-            new_after_n_chars=800,
-            combine_text_under_n_chars=200,
-            extract_image_block_output_dir=str(figures_path),
-        )
-        logger.info(f"Extracted {len(raw_pdf_elements)} elements from PDF.")
+        logger.debug(f"pdf_path: {pdf_path}")
+        logger.debug(f"output_dir: {output_dir}")
 
-        # Categorize text elements by type
+        start = time.time()
+        results = partition_pdf(
+            filename=str(pdf_path),
+            extract_images_in_pdf=True,
+            # infer_table_structure=True,
+            chunking_strategy="by_title",
+            max_characters=4000,
+            new_after_n_chars=3800,
+            combine_text_under_n_chars=2000,
+            extract_image_block_output_dir=str(output_dir),  # Use absolute path
+            extract_image_block_types=["Image", "Table"],  # Explicitly specify types
+        )
+        end = time.time()
+
+        logger.debug(f"Time taken to extract elements: {end - start} seconds")
+        logger.debug(f"Saved images to: {output_dir}")
+        return results
+
+    # Categorize elements by type
+    def _categorize_elements(
+        self, raw_pdf_elements: list[Element]
+    ) -> tuple[list[str], list[str]]:
+        """
+        Categorize extracted elements from a PDF into tables and texts.
+
+        Args:
+            raw_pdf_elements: List of unstructured.documents.elements
+
+        Returns:
+            tuple[list[str], list[str]]: texts, tables
+        """
         tables = []
         texts = []
         for element in raw_pdf_elements:
@@ -100,18 +277,138 @@ class MultiModalIndexing:
                 type(element)
             ):
                 texts.append(str(element))
+        return texts, tables
 
-        # Get image URIs with .jpg extension only
-        image_uris = sorted(
+    # Generate summaries of text elements
+    def _generate_text_summaries(
+        self, texts: list[str], tables: list[str], summarize_texts: bool = False
+    ) -> tuple[list[str], list[str]]:
+        """
+        Summarize text elements
+        Args:
+            texts(list[str]): List of text elements
+            tables(list[str]): List of table elements
+            summarize_texts(bool): Whether to summarize text elements
+
+        Returns:
+            tuple[list[str], list[str]]: text_summaries, table_summaries
+        """
+
+        # Prompt
+        prompt_text = """You are an assistant tasked with summarizing tables and text for retrieval. \
+        These summaries will be embedded and used to retrieve the raw text or table elements. \
+        Give a concise summary of the table or text that is well optimized for retrieval. Table or text: {element} """
+        prompt = ChatPromptTemplate.from_template(prompt_text)
+
+        # Text summary chain
+        summarize_chain = (
+            {"element": lambda x: x} | prompt | self.llm | StrOutputParser()
+        )
+
+        # Initialize empty summaries
+        text_summaries = []
+        table_summaries = []
+
+        # Apply to text if texts are provided and summarization is requested
+        if texts and summarize_texts:
+            text_summaries = summarize_chain.batch(texts, {"max_concurrency": 5})
+        elif texts:
+            text_summaries = texts
+
+        # Apply to tables if tables are provided
+        if tables:
+            table_summaries = summarize_chain.batch(tables, {"max_concurrency": 5})
+
+        return text_summaries, table_summaries
+
+    def _encode_image(self, image_path: str) -> str:
+        """Getting the base64 string
+
+        Args:
+            image_path (str): image path
+
+        Returns:
+            str: base64 representation of the image
+        """
+        with open(image_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode("utf-8")
+
+    def _image_summarize(self, img_base64, prompt):
+        """Make image summary"""
+
+        msg = self.llm.invoke(
             [
-                os.path.join(figures_path, image_name)
-                for image_name in os.listdir(os.path.join(figures_path))
-                if image_name.endswith(".jpg")
+                HumanMessage(
+                    content=[
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{img_base64}"
+                            },
+                        },
+                    ]
+                )
             ]
         )
-        logger.debug(f"Extracted {len(image_uris)} images from PDF.")
+        return msg.content
 
-        return texts, tables, image_uris
+    def _generate_img_summaries(self, path: str) -> tuple[list[str], list[str]]:
+        """
+        Generate summaries and base64 encoded strings for images
+
+        Args:
+            path: Path to list of .jpg files extracted by Unstructured
+
+        Returns:
+            img_base64_list: List of base64 encoded images
+            image_summaries: List of image summaries
+        """
+
+        # Store base64 encoded images
+        img_base64_list = []
+
+        # Store image summaries
+        image_summaries = []
+
+        # Prompt
+        prompt = """You are an assistant tasked with summarizing images for retrieval. \
+        These summaries will be embedded and used to retrieve the raw image. \
+        Give a concise summary of the image that is well optimized for retrieval."""
+
+        logger.debug(f"Generating image summaries for {path}")
+        # Apply to images
+        for img_file in sorted(os.listdir(path)):
+            if img_file.endswith(".jpg"):
+                img_path = os.path.join(path, img_file)
+                logger.debug(f"img_file: {img_file}")
+                logger.debug(f"img_path: {img_path}")
+                base64_image = self._encode_image(img_path)
+                img_base64_list.append(base64_image)
+                image_summaries.append(self._image_summarize(base64_image, prompt))
+
+        return img_base64_list, image_summaries
+
+    def get_retriever(self, vectorstore: Chroma) -> MultiVectorRetriever:
+        """Get a MultiVectorRetriever instance.
+
+        Args:
+            vectorstore (Chroma): The vectorstore to use for retrieval.
+
+        Returns:
+            MultiVectorRetriever: A MultiVectorRetriever instance.
+        """
+        self.retriever: MultiVectorRetriever = MultiVectorRetriever(
+            vectorstore=vectorstore,
+            docstore=self.store,
+            id_key=self.id_key,
+        )
+        # Test output
+        logger.debug(f"Retriever: {self.retriever}")
+        logger.debug(
+            f"Test query: {self.retriever.invoke('digestive system', limit=6)}"
+        )
+        return self.retriever
 
     def get_vectorstore(self) -> Chroma:
         """Get the vectorstore.
@@ -120,99 +417,3 @@ class MultiModalIndexing:
             Chroma: The vectorstore.
         """
         return self.vectorstore
-
-    def get_retriever(self, vectorstore: Chroma) -> VectorStoreRetriever:
-        """Get the retriever.
-
-        Returns:
-            VectorStoreRetriever: _description_
-        """
-        self.retriever = self.vectorstore.as_retriever(
-            search_type="similarity", search_kwargs={"k": 6}
-        )
-        return self.retriever
-
-    def process_pdf_dir(
-        self, path: str, figures_path: str
-    ) -> tuple[list[str], list[str], list[str]]:
-        """Process a directory of PDFs.
-
-        Args:
-            path (str): Path to the directory of PDFs.
-            figures_path (str): Main directory to store extracted images.
-
-        Returns:
-            tuple[list[str], list[str], list[str]]: A tuple containing the texts, tables, and image URIs extracted from the
-        """
-        # TODO: use multiprocessing as there was some pickle error with both
-        # multiprocessing and concurrent.futures.ProcessPoolExecutor
-        progress = gu.get_progress_bar()
-        texts_combined = []
-        tables_combined = []
-        image_uris_combined = []
-        logger.info(f"Processing PDFs in directory: {path}")
-        logger.debug(f"figures_path: {figures_path}")
-        with progress:
-            pdfs = [pdf for pdf in Path(path).rglob("*.pdf") if pdf.is_file()]
-            task = progress.add_task(
-                f"[green]Processing {len(pdfs)} PDFs in directory...", total=len(pdfs)
-            )
-
-            for pdf_path in pdfs:
-                try:
-                    # Process the PDF
-                    texts, tables, image_uris = self._process_pdf(
-                        pdf_path, figures_path
-                    )
-                    logger.info(
-                        f"Extracted {len(texts)} texts, {len(tables)} tables, and {len(image_uris)} images from PDF: {pdf_path}"
-                    )
-
-                    # TODO: remove similar images
-
-                    # for debugging purposes
-                    texts_combined.extend(texts)
-                    tables_combined.extend(tables)
-                    image_uris_combined.extend(image_uris)
-
-                    # get the vectorstore
-                    vectorstore = self.get_vectorstore()
-
-                    # add images and texts to the vectorstore
-                    self.add_images_texts_to_vectorstore(vectorstore, texts, image_uris)
-
-                    # update the progress bar
-                    progress.update(task, advance=1)
-                except Exception as e:
-                    logger.error(f"Error processing PDF {pdf_path}: {e}", exc=e)
-
-        return texts_combined, tables_combined, image_uris_combined
-
-    def add_images_texts_to_vectorstore(
-        self, vectorstore: Chroma, texts: list[str], image_uris: list[str]
-    ) -> None:
-        """Add images and texts to the vectorstore.
-
-        Args:
-            texts (list[str]): List of texts to add to the vectorstore.
-            image_uris (list[str]): List of image URIs to add to the vectorstore.
-
-        Returns:
-            None
-        """
-        logger.info("Adding images and texts to the vectorstore...")
-        if image_uris:
-            # Generate unique IDs for images
-            image_ids = [str(uuid.uuid4()) for _ in image_uris]
-            # Add images with IDs
-            vectorstore.add_images(uris=image_uris, ids=image_ids)
-
-        if texts:
-            # Generate unique IDs for texts
-            text_ids = [str(uuid.uuid4()) for _ in texts]
-            # Add documents with IDs
-            vectorstore.add_texts(texts=texts, ids=text_ids)
-
-        del image_uris, texts
-
-        logger.info("Added images and texts to the vectorstore.")

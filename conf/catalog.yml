@@ -1,10 +1,12 @@
-loading:
-  learning_material_dir: data/01_raw/learning_material
 indexing:
+  text:
+    learning_material_dir: data/01_raw/learning_material/
   multimodal:
-    pdf_dir_path: data/01_raw/learning_material/
+    pdf_dir_path: data/01_raw/learning_material/NUR1124/1 - Digestive system
     figures_path: data/02_intermediate/figures/
 retrieval:
+  docstore:
+    root_path: docstore
   vectorstore:
     persist_directory: chromadb
 generation:

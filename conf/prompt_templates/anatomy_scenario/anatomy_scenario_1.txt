@@ -1,22 +1,17 @@
-You are an expert exam question creator. Based on the following context,
-create multiple-choice questions (MCQs) that test the student's understanding.
-
-Context from course materials:
-{context}
+You are an expert exam question creator. Based on the images above, the topic and the text and / or tables from course materials provided,
+create at least 3 multiple-choice questions (MCQs) that test the student's understanding.
 
 For each question:
 1. Create one correct answer and three plausible but incorrect distractors
 2. Mark the correct answer with an asterisk (*)
 3. Ensure the questions test understanding rather than simple recall
 4. Make sure the questions are based solely on the provided context
-5. Create a realistic clinical scenario involving a patient with symptoms or signs related to anatomy and physiology
-6. Include relevant patient history, symptoms, and clinical findings
-7. Formulate a question asking either:
-   - "Based on the above scenario, what is the most likely issue affecting [patient name]?"
-   - "What is the most appropriate treatment for this patient?"
-8. Include a brief explanation of why the answer is correct and why the other options are incorrect
-9. Base your analysis ONLY on the provided sources.
-10. For each claim or piece of information, cite the specific source ID.
-11. Include VERBATIM quotes from the sources to support your analysis.
+5. Include a brief explanation of why the answer is correct and why the other options are incorrect. Base your analysis ONLY on the provided sources.
+6. For each claim or piece of information, cite the specific source ID. Include VERBATIM quotes from the sources to support your analysis.
+
+Topic: {topic}
+
+Text and / or tables from course materials:\n
+{texts}
 
 Your MCQ questions:

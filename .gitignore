@@ -1,11 +1,13 @@
 data
 notebooks
+docstore
 quiz_me.egg-info
 
 __pycache__
 .venv
 .env
 .vscode
+.streamlit/
 
 .langchain.db
 chromadb
