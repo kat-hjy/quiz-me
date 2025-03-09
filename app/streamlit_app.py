@@ -22,8 +22,10 @@ def generate_response(input_text, prompt_strategy):
     logger.info(f"Input: {input_text}")
     logger.info(f"Output: {dict_output}")
     logger.info(f"Content: {dict_output["answer"]}")
-
-    answer_dict: dict = dict(dict_output["answer"])
+    try:
+        answer: dict = dict(dict_output["answer"])
+    except ValueError:
+        answer = dict_output["answer"]
 
     # context_list: list[str] = list(dict_output["context"])
     # for i, c in enumerate(context_list):
@@ -37,7 +39,7 @@ def generate_response(input_text, prompt_strategy):
     #         pass
     if not output:
         output = "No response generated."
-    st.info(answer_dict["content"])
+    st.info(answer["content"] if isinstance(answer, dict) else answer)
 
 
 with st.form("my_form"):
