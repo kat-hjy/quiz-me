@@ -9,12 +9,12 @@ model:
     timeout:
 
 indexing:
-  activate: false
+  activate: true
   type: multimodal   # "multimodal" or "text"
   text:
     collection_name: text_doc
   multimodal:
-    collection_name: multimodal_doc_2
+    collection_name: multimodal_doc
 
 generation:
   activate: true

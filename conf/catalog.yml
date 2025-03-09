@@ -2,7 +2,7 @@ indexing:
   text:
     learning_material_dir: data/01_raw/learning_material/
   multimodal:
-    pdf_dir_path: data/01_raw/learning_material/NUR1124/1 - Digestive system
+    pdf_dir_path: data/01_raw/learning_material/
     figures_path: data/02_intermediate/figures/
 retrieval:
   docstore:

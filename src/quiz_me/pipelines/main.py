@@ -188,5 +188,5 @@ if __name__ == "__main__":
     config: dict = gu.load_config()
     prompt_strategy = config["generation"]["prompt_strategy"]
     topic = config["generation"][prompt_strategy]["topic"]
-    pipeline = Pipeline(topic=topic, prompt_strategy=prompt_strategy)
-    pipeline.main()
+    pipeline = Pipeline()
+    pipeline.main(topic=topic, prompt_strategy=prompt_strategy)
