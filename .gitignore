@@ -13,4 +13,4 @@ __pycache__
 
 .langchain.db
 chromadb
-src/packages/tiktoken_cache_dir
+assets
