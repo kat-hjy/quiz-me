@@ -3,35 +3,29 @@
 ## Description
 A learning aid generating study questions from a knowledge base of lecture notes.
 
-🔗 Click [here](https://quiz-me.streamlit.app/) to check out the demo!
+🔗 Click [here](https://quiz-me.streamlit.app/) to check out the demo! *Note: you will need an Anthropic API key.* 👏 Template credits: [Chanin Nantasenamat](https://blog.streamlit.io/langchain-tutorial-1-build-an-llm-powered-app-in-18-lines-of-code/).
 
-*Note: you will need an Anthropic API key.)*
-
-👏 Credits for the template: [Chanin Nantasenamat](https://blog.streamlit.io/langchain-tutorial-1-build-an-llm-powered-app-in-18-lines-of-code/).
 
 ### Features
 
-💽 End-to-end pipeline for indexing, retrieval and generation of `.pdf` files
-🤗 Choose different indexing strategies: either text only or text & images
-😄 Add or switch different prompts easily
-📝 Generate study questions based on existing prompts, or create your own!
+- 💽 End-to-end pipeline for indexing, retrieval and generation of `.pdf` files
+- 🤗 Choose different indexing strategies: either text only or text & images
+- 😄 Add or switch different prompts easily
+- 📝 Generate study questions based on existing prompts, or create your own!
 
 ### Background
 
 Studying can be overwhelming under time pressure, as students:
-🫠 struggle to retain information
-😞 don't know the material well enough
-😔 can't find practice questions with verified answers to tackle exams more confidently
+
+- 🫠 struggle to retain information
+- 😞 don't know the material well enough
+- 😔 can't find practice questions with verified answers to tackle exams more confidently
 
 ❓ This could stem from using less effective studying techniques, such as highlighting or reading notes.
 
 ❗️ Sources suggest that a more effective studying technique is active recall, which helps with memorization (Source: [Memorization Strategies](https://learningcenter.unc.edu/tips-and-tools/enhancing-your-memory/#:~:text=Use%20distributed%20practice.&text=Use%20repetition%20to%20firmly%20lodge,in%20between%20each%20study%20session.)).
 
 😎 To take away the guesswork of generating questions, prompts for the specific modules are pre-defined. All users have to do is enter the topic, select the question type, and the questions and the relevant sources are generated.
-
-### Differentiating Factors
-
-🧠 Retrieves both text & images from the knowledge base
 
 ## Installation
 1. Install the following requirements in your system:
@@ -88,13 +82,14 @@ Coming soon
 
 ## Roadmap
 
-### Features
-* Chatbot function to query over the knowledge base
-* More question types (prompt strategies)
-* Personal tutor for the students' strengths and weaknesses (e.g. testing them more on certain topics that they're weaker in.)
+### User features
+* Chatbot function to query over the knowledge base (e.g. general admin, deadlines, due dates)
+* More question types (e.g. Flashcards, MCQ questions for other modules)
+* Personal tutor for the students' strengths and weaknesses (e.g. testing them more on certain topics that they're weaker in)
 * Emotional support while studying, offering kind words and encouragement.
-* Implementation of active recall and retention techniques, adjusting the time between the last time they were tested on the topic, and the next time they should be tested, based on their familiarity with the topic.
+* Implementation of active recall and retention techniques (e.g. adjusting the time between the last time they were tested on the topic, and the next time they should be tested, based on their familiarity with the topic).
 
+### Technical features
 * Overall
     * Topic generation and document tagging
     * Find out learning objectives
@@ -104,8 +99,10 @@ Coming soon
         * Cleaning the loaded documents' contents
         * Remove duplicated images
         * Remove irrelevant images (e.g. logos)
+    * Indexing:
+        * Use UnstructuredLoader from Langchain library
 * Retrieval pipeline improvements
     * Retrieval:
         * More advanced retrieval techniques
 * Generation pipeline improvements
-    * Better prompts
+    * Stricter typing for MCQ questions for the anatomy scenario
