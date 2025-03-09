@@ -1,4 +1,4 @@
-"""Streamlit app"""
+"""MCQ Generator App"""
 
 import streamlit as st
 from quiz_me.pipelines import general_utils as gu
@@ -24,9 +24,10 @@ def generate_response(input_text, prompt_strategy):
     logger.info(f"Content: {dict_output["answer"]}")
     try:
         answer: dict = dict(dict_output["answer"])
+        logger.info(f"Answer: {answer["content"]}")
     except ValueError:
         answer = dict_output["answer"]
-
+        logger.info(f"Answer: {answer}")
     # context_list: list[str] = list(dict_output["context"])
     # for i, c in enumerate(context_list):
     #     if pu._is_base64(c):
