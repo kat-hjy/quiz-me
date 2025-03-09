@@ -53,7 +53,7 @@ with st.form("my_form"):
         [
             "Anatomy MCQs",
             # "Microbiology MCQs",
-            "Flashcards",
+            # "Flashcards",
         ],
     )
     submitted = st.form_submit_button("Submit")
