@@ -6,8 +6,8 @@ import sys
 # Add project root to Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
-from src.modeling import utils as mu  # noqa: E402
-from src.pipelines import general_utils as gu  # noqa: E402
+import src.modeling.utils as mu  # noqa: E402
+import src.pipelines.general_utils as gu  # noqa: E402
 
 st.title("🦜🔗 Quickstart App")
 
