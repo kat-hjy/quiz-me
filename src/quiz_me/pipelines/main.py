@@ -1,7 +1,5 @@
 """This module contains the main pipeline for the project."""
 
-import os
-import sys
 from langchain_core.documents import Document
 from langchain_core.vectorstores.base import VectorStoreRetriever
 from dotenv import load_dotenv
@@ -11,21 +9,17 @@ from langchain_anthropic import ChatAnthropic
 from langchain.retrievers.multi_vector import MultiVectorRetriever
 from pathlib import Path
 
-# Add project root to Python path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-sys.path.insert(0, project_root)
-
 # TODO: import directly from modules
-from src.pipelines.indexing import TextIndexing, MultiModalIndexing  # noqa: E402
-from src.prompts.prompt_strategy_pattern import PromptContext  # noqa: E402
-from src.prompts.prompt_strategies.flashcards import Flashcards  # noqa: E402
-from src.prompts.prompt_strategies.microbiology_scenario import (  # noqa: E402
+from quiz_me.pipelines.indexing import TextIndexing, MultiModalIndexing  # noqa: E402
+from quiz_me.prompts.prompt_strategy_pattern import PromptContext  # noqa: E402
+from quiz_me.prompts.prompt_strategies.flashcards import Flashcards  # noqa: E402
+from quiz_me.prompts.prompt_strategies.microbiology_scenario import (  # noqa: E402
     MicrobiologyScenario,
 )
-from src.prompts.prompt_strategies.anatomy_scenario import AnatomyScenario  # noqa: E402
-from src.modeling import utils as mu  # noqa: E402
-from src.prompts import utils as pu  # noqa: E402
-import src.pipelines.general_utils as gu  # noqa: E402
+from quiz_me.prompts.prompt_strategies.anatomy_scenario import AnatomyScenario  # noqa: E402
+from quiz_me.modeling import utils as mu  # noqa: E402
+from quiz_me.prompts import utils as pu  # noqa: E402
+import quiz_me.pipelines.general_utils as gu  # noqa: E402
 
 # Load environment variables
 load_dotenv()

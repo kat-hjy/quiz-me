@@ -11,7 +11,7 @@ from langchain_voyageai import VoyageAIEmbeddings
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-import src.pipelines.general_utils as gu
+import quiz_me.pipelines.general_utils as gu
 from langchain_text_splitters import CharacterTextSplitter
 from unstructured.partition.pdf import partition_pdf
 from unstructured.documents.elements import Element
