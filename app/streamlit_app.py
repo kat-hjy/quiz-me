@@ -8,7 +8,7 @@ from loguru import logger
 
 load_dotenv()
 
-st.title("🦜🔗 Quickstart App")
+st.title("🦜🔗 MCQ Generator App")
 
 anthropic_api_key = st.sidebar.text_input("Anthropic API Key", type="password")
 config = gu.load_config()
