@@ -3,14 +3,17 @@ from langchain_anthropic import ChatAnthropic
 from quiz_me.modeling import utils as mu
 from quiz_me.pipelines import general_utils as gu
 from dotenv import load_dotenv
+import os
+from loguru import logger
 
 load_dotenv()
 
 st.title("🦜🔗 Quickstart App")
 
 openai_api_key = st.sidebar.text_input("Anthropic API Key", type="password")
-
-config = gu.load_config()
+CONFIG_PATH = os.getenv("CONFIG_PATH")
+logger.info(f"CONFIG_PATH: {CONFIG_PATH}")
+config = gu.load_config(config_path=CONFIG_PATH)
 model_category = config["model"]["category"]
 
 
