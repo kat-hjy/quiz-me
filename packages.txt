@@ -15,3 +15,4 @@ libtesseract-dev
 libtesseract4
 libreoffice
 pandoc
+qpdf
