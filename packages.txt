@@ -5,3 +5,6 @@ libxext6
 tesseract-ocr
 tesseract-ocr-all
 libglib2.0-0
+poppler-utils
+libmagic1
+ghostscript
