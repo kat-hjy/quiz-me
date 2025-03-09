@@ -75,7 +75,10 @@ whitelist-regex = []
 [tool.ruff]
 target-version = "py312"
 
+# add pip installed libraries
+[tool.setuptools.packages.find]
+include = ['quiz-me*']
+where = ['src']
+
 [tool.uv]
 dev-dependencies = ["pylint>=2.16.2", "pytest>=7.4.0"]
-
-# add pip installed libraries
