@@ -29,6 +29,8 @@ In other words, students need a solution to study better.
 
 ❗️ Sources suggest that an effective studying technique is active recall, which helps with memorization (Source: [Memorization Strategies](https://learningcenter.unc.edu/tips-and-tools/enhancing-your-memory/#:~:text=Use%20distributed%20practice.&text=Use%20repetition%20to%20firmly%20lodge,in%20between%20each%20study%20session.)).
 
+### Differentiating factors
+
 😎 To take away the guesswork of generating questions, prompts for the specific modules are pre-defined. All users have to do is enter the topic, select the question type, and the questions and the relevant sources are generated.
 
 ## Installation
