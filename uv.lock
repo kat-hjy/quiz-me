@@ -3774,9 +3774,6 @@ dependencies = [
     { name = "traitlets" },
     { name = "transformers" },
     { name = "unstructured", extra = ["all-docs"] },
-    { name = "unstructured-client" },
-    { name = "unstructured-inference" },
-    { name = "unstructured-pytesseract" },
     { name = "uuid" },
 ]
 
@@ -3833,9 +3830,6 @@ requires-dist = [
     { name = "traitlets", specifier = ">=5.14.3" },
     { name = "transformers", specifier = ">=4.49.0" },
     { name = "unstructured", extras = ["all-docs"], specifier = ">=0.16.20" },
-    { name = "unstructured-client", specifier = ">=0.30.6" },
-    { name = "unstructured-inference", specifier = ">=0.8.7" },
-    { name = "unstructured-pytesseract", specifier = ">=0.3.13" },
     { name = "uuid", specifier = ">=1.30" },
 ]
 

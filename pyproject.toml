@@ -48,9 +48,6 @@ dependencies = [
   "torch>=2.6.0",
   "traitlets>=5.14.3",
   "transformers>=4.49.0",
-  "unstructured-client>=0.30.6",
-  "unstructured-inference>=0.8.7",
-  "unstructured-pytesseract>=0.3.13",
   "unstructured[all-docs]>=0.16.20",
   "uuid>=1.30"
 ]
