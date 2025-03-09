@@ -22,12 +22,12 @@ A learning aid generating study questions from a knowledge base of lecture notes
 Studying can be overwhelming under time pressure, as students:
 
 - 🫠 struggle to retain information
-- 😞 don't know the material well enough
+- 😞 don't know how to spot questions
 - 😔 can't find practice questions with verified answers to tackle exams more confidently
 
-❓ This could stem from using less effective studying techniques, such as highlighting or reading notes.
+In other words, students need a solution to study better.
 
-❗️ Sources suggest that a more effective studying technique is active recall, which helps with memorization (Source: [Memorization Strategies](https://learningcenter.unc.edu/tips-and-tools/enhancing-your-memory/#:~:text=Use%20distributed%20practice.&text=Use%20repetition%20to%20firmly%20lodge,in%20between%20each%20study%20session.)).
+❗️ Sources suggest that an effective studying technique is active recall, which helps with memorization (Source: [Memorization Strategies](https://learningcenter.unc.edu/tips-and-tools/enhancing-your-memory/#:~:text=Use%20distributed%20practice.&text=Use%20repetition%20to%20firmly%20lodge,in%20between%20each%20study%20session.)).
 
 😎 To take away the guesswork of generating questions, prompts for the specific modules are pre-defined. All users have to do is enter the topic, select the question type, and the questions and the relevant sources are generated.
 
