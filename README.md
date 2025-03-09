@@ -298,6 +298,3 @@ No authentication or authorization is required to access these documents as they
 #### Challenges
 ##### Extracting images
 * The lecture notes are a mix of images and texts. Some libraries out there such as `Unstructured` do extract text and images, but the library does still miss out images from lecture notes with many images.
-
-
-### 2.
