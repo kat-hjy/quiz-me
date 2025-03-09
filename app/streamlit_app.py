@@ -2,6 +2,9 @@ import streamlit as st
 from langchain_anthropic import ChatAnthropic
 from quiz_me.modeling import utils as mu
 from quiz_me.pipelines import general_utils as gu
+from dotenv import load_dotenv
+
+load_dotenv()
 
 st.title("🦜🔗 Quickstart App")
 
