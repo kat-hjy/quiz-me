@@ -106,3 +106,9 @@ Coming soon
         * More advanced retrieval techniques
 * Generation pipeline improvements
     * Stricter typing for MCQ questions for the anatomy scenario
+* MLOps
+    * Containerize the application such that it is easily rebuilt and redeployable
+* Frontend
+    * Move frontend to React & related tech stack
+* Backend (databases)
+    * Deploy vectorstore and docstore to cloud
