@@ -205,7 +205,7 @@ class AnatomyScenario:
             logger.debug(f"Retrieving documents for topic: {state['topic']}")
             logger.debug(f"Retriever: {self.retriever}")
 
-            retrieved_docs = self.retriever.invoke(state["topic"])
+            retrieved_docs = self.retriever.invoke(state["topic"], k=10)
             # Decode any bytes content back to strings
             decoded_docs = []
             for doc in retrieved_docs:

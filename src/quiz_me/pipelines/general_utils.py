@@ -51,12 +51,16 @@ def serialize_value(value: any) -> any:
     return value
 
 
-def save_output(output: Dict | AddableValuesDict, output_dir: str) -> None:
+def save_output(output: Dict | AddableValuesDict, output_dir: str) -> tuple[bool, any]:
     """Save the output to a JSON file with timestamp.
 
     Args:
         output: The output to save
         output_dir: Directory to save the output file
+
+    Returns:
+        bool: True if output is saved successfully as .json, False otherwise
+        any: The serialized output
     """
     # Get Singapore timezone
     tz = pytz.timezone("Asia/Singapore")
@@ -76,7 +80,7 @@ def save_output(output: Dict | AddableValuesDict, output_dir: str) -> None:
         with open(save_path, "w", encoding="utf-8") as f:
             json.dump(serialized_output, f, indent=2, ensure_ascii=False)
         logger.info(f"Output saved to {save_path}")
-
+        return True, serialized_output
     except Exception as e:
         logger.error(f"Error saving output: {e}")
         # Save as text if JSON serialization fails
@@ -84,6 +88,7 @@ def save_output(output: Dict | AddableValuesDict, output_dir: str) -> None:
         with open(txt_path, "w", encoding="utf-8") as f:
             f.write(str(output))
         logger.warning(f"Saved output as text file instead: {txt_path}")
+        return False, output
 
 
 def num_tokens_from_string(string: str, encoding_name: str = "cl100k_base") -> int:

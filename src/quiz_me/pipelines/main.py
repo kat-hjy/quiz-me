@@ -32,7 +32,9 @@ class Pipeline:
         """Initialize the Pipeline class."""
         pass
 
-    def main(self, topic: str, prompt_strategy: str = "anatomy_scenario") -> str:
+    def main(
+        self, topic: str, prompt_strategy: str = "anatomy_scenario"
+    ) -> tuple[bool, any]:
         """Main pipeline for the project.
 
         Args:
@@ -166,12 +168,18 @@ class Pipeline:
             ### POST-GENERATION ###
             logger.info(f"Output: \n{output}")
             # save output to a json file
-            gu.save_output(output, catalog["generation"][prompt_strategy]["output_dir"])
-            return output
+            success, output = gu.save_output(
+                output, catalog["generation"][prompt_strategy]["output_dir"]
+            )
+            logger.info(f"Success: {success}")
+            logger.info(f"Output: {output}")
+
+            return success, output
         else:
             logger.info("Generation is not activated. Skipping...")
-            output = "testing"
-            return output
+            success = False
+            output = None
+            return success, output
 
 
 if __name__ == "__main__":
