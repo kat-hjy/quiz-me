@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain_anthropic import ChatAnthropic
-from src.modeling import utils as mu
-from src.pipelines import general_utils as gu
+from quiz_me.modeling import utils as mu
+from quiz_me.pipelines import general_utils as gu
 
 st.title("🦜🔗 Quickstart App")
 

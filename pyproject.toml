@@ -77,8 +77,15 @@ target-version = "py312"
 
 # add pip installed libraries
 [tool.setuptools.packages.find]
-include = ['quiz-me*']
+include = ['quiz_me*']
 where = ['src']
 
 [tool.uv]
-dev-dependencies = ["pylint>=2.16.2", "pytest>=7.4.0"]
+dev-dependencies = [
+  "pylint>=2.16.2",
+  "pytest>=7.4.0",
+  "quiz-me"
+]
+
+[tool.uv.sources]
+quiz-me = {workspace = true}
