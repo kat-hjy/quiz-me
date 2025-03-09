@@ -6,5 +6,11 @@ tesseract-ocr
 tesseract-ocr-all
 libglib2.0-0
 poppler-utils
-libmagic1
+libmagic-dev
 ghostscript
+freeglut3-dev
+libgtk2.0-dev
+libtesseract-dev
+libtesseract4
+libreoffice
+pandoc
