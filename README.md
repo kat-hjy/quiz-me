@@ -37,7 +37,7 @@ The process follows the guidelines outlined by the team at Microsoft Azure.
 
 ###### Pain Points
 
-Nursing students, especially mid-career transitioners, often feel overwhelmed while studying for exams under time pressure. Some of the common challenges include:
+Nursing students often feel overwhelmed while studying for exams under time pressure. Some of the common challenges include:
 
 1. Struggling with retaining what they have already learnt.
 2. Not knowing how to identify what is important to study for exams.
