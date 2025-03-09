@@ -3,6 +3,8 @@ notebooks
 docstore
 quiz_me.egg-info
 
+docker
+
 __pycache__
 .venv
 .env
